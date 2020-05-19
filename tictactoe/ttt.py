@@ -5,13 +5,8 @@ ToDo:
 1. How to improve the performance 
     a. Either with parallel computing with multi-core
     b. Or use the restriction on the number of computation for minmax alg
-2. Search for the next move in the list such that it get best potential payoff
-3. Break when there is a prepresentative of the same utility value
-
-Others:    
-1. Split the file into multiple modules and add a conf file
-2. Add the input options with Pygame viz instead. 
-3. Move the content around for nicer visualisation.    
+2. Split the file into multiple modules and add a conf file
+3. Add the input options with Pygame viz instead.     
     """
 
 
@@ -25,9 +20,11 @@ import copy
 import random
 import numpy as np
 import pandas as pd
-from joblib import Parallel, delayed
+# from joblib import Parallel, delayed
+# from numba import njit, prange
 
-os.chdir('/home/philip/Learning/Computer Science/CS50_Python/tictactoe')
+
+os.chdir('/home/philip/Learning/Computer_Science/CS50_Python/Projects/tictactoe')
 
 pygame.init()
 
@@ -53,13 +50,13 @@ global bs; global nt; global AIlevel
 bs = inputNumber("Input the size of ttt-game board (less than 10): ")    
 nt = inputNumber("Input the number of continuous length to win: ") 
 nt <= bs, 'Length to win must be less than or equal to board size'
-AIlevel = 4
+AIlevel = inputNumber("Level of your AI (1 random - 7 complex): ") 
 
 X = "X"
 O = "O"
 EMPTY = None
 
-size = width, height = 400 + 160*bs, 200 + 160*bs
+size = width, height = 50 + 160*bs, 100 + 160*bs
 
 # Colors
 black = (0, 0, 0)
@@ -172,8 +169,6 @@ def terminal(board):
 
 
 
-
-
 def utility(board):
     """
     Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
@@ -185,58 +180,87 @@ def utility(board):
     else:
         return 0
 
-#----------------------------------------
-def min_func(board, action, level, v, final_action):
-    nboard = result(board, action)
-    new_v = MIN_VALUE(nboard, level=level+1)[0]
-    if new_v > v:
-        v = new_v
-        final_action = action
-    return v, final_action
+
+## We will now update the alpha-beta pruning
+# Alpha: Best already explored option for player Max  'X'
+# Beta: Best already explored option for player Min  'O'
 
 ## define the two recursive funcs to be used later 
-def MAX_VALUE(board, level=0):
+def MAX_VALUE(board, alpha, beta, level=0):
     if terminal(board):         
         return utility(board), None 
 
-    ## intialize the values
-    v = -np.inf 
-    final_action = random.choice(actions(board))
+    v = -np.inf
+    # intialize the values  
+    action_board = actions(board)  
+    random_choice_list = [x for x in action_board\
+                if (x[0] >= math.floor(bs/2)-1) & (x[0] <= math.floor(bs/2)+1) &  (x[1] >= math.floor(bs/2)-1) & (x[1] <= math.floor(bs/2)+1)]
+    
 
     ## restrict the computation by using level
     if level < AIlevel:
-        output = Parallel(n_jobs=7)(delayed(min_func)(board, action, level, v, final_action) for action in np.random.permutation(actions(board)))
-        v, final_action = max(output,key=lambda item:item[0])
-    else:        
+        for action in np.random.permutation(action_board): 
+            nboard = result(board, action)
+            new_v = MIN_VALUE(nboard, alpha, beta, level=level+1)[0]
+            if new_v == 1:
+                return (1, action)
+                break
+            elif new_v > v:
+                v = new_v
+                final_action = action
+            
+            # check the alpha and beta
+            if v > alpha:
+                alpha = v
+            if v >= beta:
+                return (v, action)
+                break
+
+
+    else:
+        if len(random_choice_list) > 0:
+            final_action = random.choice(random_choice_list)
+        else:
+            final_action = random.choice(action_board)
         v = utility(result(board, final_action))
-  
+
     return v, final_action
 
 
-
-#-----------------------------------
-
-def max_func(board, action, level, v, final_action):
-    nboard = result(board, action)
-    new_v = MAX_VALUE(nboard, level=level+1)[0]
-    if new_v < v:
-        v = new_v
-        final_action = action
-    return v, final_action
-
-
-
-def MIN_VALUE(board, level=0):
+def MIN_VALUE(board, alpha, beta, level=0):
     if terminal(board):
         return utility(board), None
 
-    v = np.inf  
-    final_action = random.choice(actions(board))
+    v = np.inf
+    # intialize the values  
+    action_board = actions(board)  
+    random_choice_list = [x for x in action_board\
+                if (x[0] >= math.floor(bs/2)-1) & (x[0] <= math.floor(bs/2)+1) &  (x[1] >= math.floor(bs/2)-1) & (x[1] <= math.floor(bs/2)+1)]
+    ## Q: Why setting up the final_action here will be problematic?
 
     if level < AIlevel:
-        output = Parallel(n_jobs=7)(delayed(max_func)(board, action, level, v, final_action) for action in np.random.permutation(actions(board)))
-        v, final_action = min(output,key=lambda item:item[0])
+        for action in np.random.permutation(action_board):
+            nboard = result(board, action)
+            new_v = MAX_VALUE(nboard, alpha, beta, level=level+1)[0]
+            if new_v == -1:
+                return (-1, action)
+                break
+            if new_v < v:
+                v = new_v
+                final_action = action
+
+            # check alpha and beta
+            if v < beta:
+                beta = v
+            if v <= alpha:
+                return (v, action)
+                break
+
     else:
+        if len(random_choice_list) > 0:
+            final_action = random.choice(random_choice_list)
+        else:
+            final_action = random.choice(action_board)
         v = utility(result(board, final_action))
 
     return v, final_action
@@ -248,12 +272,20 @@ def minimax(board):
     Returns the optimal action for the current player on the board.
     """
     start = time.time()
-    if whichplayer(board)==X:
-        v, final_action = MAX_VALUE(board)
+    # check if it is the start of the game to use the open-book strategy
+    if (bs > 5) & (pd.notna(board).sum() < 4):
+        v = 0
+        final_action = random.choice([x for x in actions(board)\
+            if (x[0] >= math.floor(bs/2)-1) & (x[0] <= math.floor(bs/2)) &  (x[1] >= math.floor(bs/2)-1) & (x[1] <= math.floor(bs/2))])
     else:
-        v, final_action = MIN_VALUE(board)
+        alpha = -np.inf
+        beta = np.inf
+        if whichplayer(board)==X:
+            v, final_action = MAX_VALUE(board, alpha, beta)
+        else:
+            v, final_action = MIN_VALUE(board, alpha, beta)
 
-    print(f'Value {v}, Action {final_action}, AI thinking time: {time.time() - start}')
+    print(f'Value {v}, Action {final_action}, AI thinking time: {round(time.time() - start,4)}')
     return final_action
 
 
@@ -339,7 +371,7 @@ while True:
         elif user == player:
             title = f"Play as {user}"
         else:
-            title = f"Computer thinking..."
+            title = f"AI thinking..."
         title = largeFont.render(title, True, white)
         titleRect = title.get_rect()
         titleRect.center = ((width / 2), 30)
