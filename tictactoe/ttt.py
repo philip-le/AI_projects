@@ -24,7 +24,7 @@ import pandas as pd
 # from numba import njit, prange
 
 
-os.chdir('/home/philip/Learning/Computer_Science/CS50_Python/Projects/tictactoe')
+# os.chdir('/tictactoe')
 
 pygame.init()
 
