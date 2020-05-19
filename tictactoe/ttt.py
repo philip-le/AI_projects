@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 
-os.chdir('/home/philip/Learning/Computer Science/CS50_Python/tictactoe')
+os.chdir('/home/philip/Learning/Computer_Science/CS50_Python/AI_projects/tictactoe')
 
 pygame.init()
 
@@ -186,6 +186,7 @@ def utility(board):
         return 0
 
 #----------------------------------------
+# helper in the MAX_VALUE func
 def min_func(board, action, level, v, final_action):
     nboard = result(board, action)
     new_v = MIN_VALUE(nboard, level=level+1)[0]
@@ -194,8 +195,10 @@ def min_func(board, action, level, v, final_action):
         final_action = action
     return v, final_action
 
-## define the two recursive funcs to be used later 
+
+# Parallel code for the heavy search
 def MAX_VALUE(board, level=0):
+    ## define the recursive func to be used later
     if terminal(board):         
         return utility(board), None 
 
@@ -215,7 +218,7 @@ def MAX_VALUE(board, level=0):
 
 
 #-----------------------------------
-
+# helper in the MIN_VALUE func
 def max_func(board, action, level, v, final_action):
     nboard = result(board, action)
     new_v = MAX_VALUE(nboard, level=level+1)[0]
@@ -225,8 +228,9 @@ def max_func(board, action, level, v, final_action):
     return v, final_action
 
 
-
+# Parallel code for the heavy search
 def MIN_VALUE(board, level=0):
+    ## define the recursive func to be used later
     if terminal(board):
         return utility(board), None
 
