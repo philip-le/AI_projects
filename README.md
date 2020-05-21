@@ -1,4 +1,4 @@
-# AI_projects
+# AI projects
 
 Several interesting games are designed using Python, Pygame and Artificial Intelligence (AI).
 
@@ -19,7 +19,7 @@ Pygame
 
 ## Authors
 
-* **Philip Le** - *L3Harris* - [](https://github.com/philip-le)
+* **Hoang Phuoc Le** - *Data Scientist* - ['Gihub'](https://github.com/philip-le)
 
 See also the list of [contributors](https://github.com/philip-le/AI_projects/contributors) who participated in this project.
 
