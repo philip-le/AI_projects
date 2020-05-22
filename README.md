@@ -3,10 +3,7 @@
 Several interesting games are designed using Python, Pygame and Artificial Intelligence (AI).
 
 <img src="./tictactoe/ttt_interface.jpeg" width="294" height="224">
-<img src="./mazes/maze.png" width="224" height="224">
-
-
-
+<img src="./mazes/maze.png" width="294" height="294">
 
 
 ## Getting Started
