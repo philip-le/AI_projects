@@ -204,7 +204,7 @@ def MAX_VALUE(board, alpha, beta, level=0):
             new_v = MIN_VALUE(nboard, alpha, beta, level=level+1)[0]
             if new_v == 1:
                 return (1, action)
-                break
+
             elif new_v > v:
                 v = new_v
                 final_action = action
@@ -214,7 +214,6 @@ def MAX_VALUE(board, alpha, beta, level=0):
                 alpha = v
             if v >= beta:
                 return (v, action)
-                break
 
 
     else:
@@ -244,7 +243,7 @@ def MIN_VALUE(board, alpha, beta, level=0):
             new_v = MAX_VALUE(nboard, alpha, beta, level=level+1)[0]
             if new_v == -1:
                 return (-1, action)
-                break
+
             if new_v < v:
                 v = new_v
                 final_action = action
@@ -254,7 +253,7 @@ def MIN_VALUE(board, alpha, beta, level=0):
                 beta = v
             if v <= alpha:
                 return (v, action)
-                break
+
 
     else:
         if len(random_choice_list) > 0:
