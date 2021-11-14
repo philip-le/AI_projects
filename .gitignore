@@ -1,2 +1,4 @@
 *.ogv
 PyChess
+.vscode/
+*.pyc

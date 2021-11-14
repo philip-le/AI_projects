@@ -2,7 +2,7 @@ import csv
 import sys
 import os
 
-os.chdir('/home/philip/Learning/Computer Science/CS50_Python/degrees/')
+# os.chdir('/home/philip/Learning/Computer Science/CS50_Python/degrees/')
 
 from util import Node, StackFrontier, QueueFrontier
 
