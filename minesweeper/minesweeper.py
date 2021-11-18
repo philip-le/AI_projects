@@ -101,6 +101,13 @@ class Sentence():
     def __str__(self):
         return f"{self.cells} = {self.count}"
 
+    def __subset__(self, other):
+        return self.cells.issubset(other.cells)
+
+    def create_new_sentence(self, other):
+        """If the first sentence is a proper subset of second sentence, then create a new one"""
+        return Sentence(other.cells - self.cells, other.count - self.count)
+
     def known_mines(self):
         """
         Returns the set of all cells in self.cells known to be mines.
@@ -213,8 +220,15 @@ class MinesweeperAI():
                         cells.add((i,j))
         
 
-        new_sentence = Sentence(cells, count)
+        new_sentence = Sentence(cells, count)        
+        current_knowledge = self.knowledge.copy()
         self.knowledge.append(new_sentence)
+
+        for other_sentence in current_knowledge:
+            if new_sentence.__subset__(other_sentence) & (not new_sentence.__eq__(other_sentence)):
+                self.knowledge.append(new_sentence.create_new_sentence(other_sentence))
+            elif other_sentence.__subset__(new_sentence) & (not other_sentence.__eq__(new_sentence)):
+                self.knowledge.append(other_sentence.create_new_sentence(new_sentence))
 
         for acell in new_sentence.known_mines():
             self.mark_mine(acell)
@@ -237,6 +251,8 @@ class MinesweeperAI():
         and self.moves_made, but should not modify any of those values.
         """
         safe_moves = self.safes - self.moves_made
+        print('****************************************')
+        print(f"Current set of predicted mines: {self.mines}")
         if len(safe_moves) > 0:
             return safe_moves.pop()
         else:
