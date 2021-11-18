@@ -2,3 +2,4 @@
 PyChess
 .vscode/
 *.pyc
+*/__pycache__/
