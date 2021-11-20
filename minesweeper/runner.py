@@ -214,9 +214,10 @@ while True:
     if move:
         if game.is_mine(move):
             lost = True
-        else:
+        else:            
             nearby = game.nearby_mines(move)
             revealed.add(move)
             ai.add_knowledge(move, nearby)
+            print('****************************************')
 
     pygame.display.flip()

@@ -102,11 +102,15 @@ class Sentence():
         return f"{self.cells} = {self.count}"
 
     def __subset__(self, other):
-        return self.cells.issubset(other.cells)
+        if len(self.cells) > 0: 
+            return self.cells.issubset(other.cells)
+        else:
+            return False
 
     def create_new_sentence(self, other):
         """If the first sentence is a proper subset of second sentence, then create a new one"""
-        return Sentence(other.cells - self.cells, other.count - self.count)
+        if (len(other.cells) > len(self.cells)) & (len(self.cells) > 0) & (self.cells.issubset(other.cells) & (other.count >= self.count)):
+            return Sentence(other.cells - self.cells, other.count - self.count)
 
     def known_mines(self):
         """
@@ -177,6 +181,7 @@ class MinesweeperAI():
         self.mines.add(cell)
         for sentence in self.knowledge:
             sentence.mark_mine(cell)
+        self.knowledge.append(Sentence((cell,), 1))
 
     def mark_safe(self, cell):
         """
@@ -186,6 +191,7 @@ class MinesweeperAI():
         self.safes.add(cell)
         for sentence in self.knowledge:
             sentence.mark_safe(cell)
+        self.knowledge.append(Sentence((cell,), 0))
 
     def add_knowledge(self, cell, count):
         """
@@ -220,24 +226,36 @@ class MinesweeperAI():
                         cells.add((i,j))
         
 
-        new_sentence = Sentence(cells, count)        
+        new_sentence = Sentence(cells, count)
+        print(f"Original: {new_sentence}")        
         current_knowledge = self.knowledge.copy()
+        # for sentence in current_knowledge:
+        #     print(sentence)
         self.knowledge.append(new_sentence)
 
         for other_sentence in current_knowledge:
             if new_sentence.__subset__(other_sentence) & (not new_sentence.__eq__(other_sentence)):
-                self.knowledge.append(new_sentence.create_new_sentence(other_sentence))
+                another_sentence = new_sentence.create_new_sentence(other_sentence)
+                if (another_sentence not in self.knowledge) & (len(another_sentence.cells)>0):
+                    print(f"BInfer: {another_sentence}")
+                    self.knowledge.append(another_sentence)
+                    self.mines = self.mines | (another_sentence.known_mines()) 
+                    self.safes = self.safes | (another_sentence.known_safes())
             elif other_sentence.__subset__(new_sentence) & (not other_sentence.__eq__(new_sentence)):
-                self.knowledge.append(other_sentence.create_new_sentence(new_sentence))
+                another_sentence = other_sentence.create_new_sentence(new_sentence)
+                if (another_sentence not in self.knowledge) & (len(another_sentence.cells)>0):
+                    print(f"SInfer: {another_sentence}")
+                    self.knowledge.append(another_sentence)
+                    self.mines = self.mines | (another_sentence.known_mines()) 
+                    self.safes = self.safes | (another_sentence.known_safes())
+                    
+
 
         for acell in new_sentence.known_mines():
             self.mark_mine(acell)
-            self.knowledge.append(new_sentence)
 
         for acell in new_sentence.known_safes():
             self.mark_safe(acell)
-            self.knowledge.append(new_sentence)
-
 
 
 
@@ -251,8 +269,8 @@ class MinesweeperAI():
         and self.moves_made, but should not modify any of those values.
         """
         safe_moves = self.safes - self.moves_made
-        print('****************************************')
         print(f"Current set of predicted mines: {self.mines}")
+        print(f"Current set of predicted safes: {safe_moves}")
         if len(safe_moves) > 0:
             return safe_moves.pop()
         else:
