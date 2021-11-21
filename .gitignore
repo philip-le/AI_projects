@@ -1,5 +1,7 @@
 *.ogv
 PyChess
+pygame/
+parallelParking/
 .vscode/
 *.pyc
 */__pycache__/

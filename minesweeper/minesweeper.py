@@ -1,5 +1,6 @@
 import itertools
 import random
+import copy
 
 
 class Minesweeper():
@@ -136,8 +137,7 @@ class Sentence():
         Updates internal knowledge representation given the fact that
         a cell is known to be a mine.
         """
-        self.known_mines().add(cell)
-        if (cell in self.cells) & (self.count > 1):
+        if (cell in self.cells) & (self.count >= 1):
             self.cells -= set(cell)
             self.count -= 1
 
@@ -147,7 +147,6 @@ class Sentence():
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
-        self.known_safes().add(cell)
         if cell in self.cells:
             self.cells -= set(cell)
 
@@ -181,7 +180,6 @@ class MinesweeperAI():
         self.mines.add(cell)
         for sentence in self.knowledge:
             sentence.mark_mine(cell)
-        self.knowledge.append(Sentence((cell,), 1))
 
     def mark_safe(self, cell):
         """
@@ -191,7 +189,6 @@ class MinesweeperAI():
         self.safes.add(cell)
         for sentence in self.knowledge:
             sentence.mark_safe(cell)
-        self.knowledge.append(Sentence((cell,), 0))
 
     def add_knowledge(self, cell, count):
         """
@@ -222,16 +219,25 @@ class MinesweeperAI():
 
                 # Update count if cell in bounds and is mine
                 if 0 <= i < self.height and 0 <= j < self.width:
-                    if (i, j) not in self.safes: 
-                        cells.add((i,j))
+                    if (i, j) not in self.safes and (i, j) not in self.moves_made:
+                        if (i, j) not in self.mines: 
+                            cells.add((i,j))
+                        else:
+                            count -= 1
         
 
         new_sentence = Sentence(cells, count)
         print(f"Original: {new_sentence}")        
-        current_knowledge = self.knowledge.copy()
+        current_knowledge = copy.deepcopy(self.knowledge)
         # for sentence in current_knowledge:
         #     print(sentence)
         self.knowledge.append(new_sentence)
+        for acell in new_sentence.known_mines():
+            self.mark_mine(acell)
+
+        for acell in new_sentence.known_safes():
+            self.mark_safe(acell)
+
 
         for other_sentence in current_knowledge:
             if new_sentence.__subset__(other_sentence) & (not new_sentence.__eq__(other_sentence)):
@@ -239,23 +245,23 @@ class MinesweeperAI():
                 if (another_sentence not in self.knowledge) & (len(another_sentence.cells)>0):
                     print(f"BInfer: {another_sentence}")
                     self.knowledge.append(another_sentence)
-                    self.mines = self.mines | (another_sentence.known_mines()) 
-                    self.safes = self.safes | (another_sentence.known_safes())
+                    for acell in another_sentence.known_mines():
+                        self.mark_mine(acell)
+                    for acell in another_sentence.known_safes():
+                        self.mark_safe(acell)
+                if (another_sentence.count < 0):
+                    raise Exception
+
+
             elif other_sentence.__subset__(new_sentence) & (not other_sentence.__eq__(new_sentence)):
                 another_sentence = other_sentence.create_new_sentence(new_sentence)
                 if (another_sentence not in self.knowledge) & (len(another_sentence.cells)>0):
                     print(f"SInfer: {another_sentence}")
                     self.knowledge.append(another_sentence)
-                    self.mines = self.mines | (another_sentence.known_mines()) 
-                    self.safes = self.safes | (another_sentence.known_safes())
-                    
-
-
-        for acell in new_sentence.known_mines():
-            self.mark_mine(acell)
-
-        for acell in new_sentence.known_safes():
-            self.mark_safe(acell)
+                    for acell in another_sentence.known_mines():
+                        self.mark_mine(acell)
+                    for acell in another_sentence.known_safes():
+                        self.mark_safe(acell)
 
 
 
@@ -270,7 +276,7 @@ class MinesweeperAI():
         """
         safe_moves = self.safes - self.moves_made
         print(f"Current set of predicted mines: {self.mines}")
-        print(f"Current set of predicted safes: {safe_moves}")
+        print(f"Current set of next safe moves: {safe_moves}")
         if len(safe_moves) > 0:
             return safe_moves.pop()
         else:
@@ -291,3 +297,7 @@ class MinesweeperAI():
             return random_moves.pop()
         else:
             return None
+
+    
+    def getFlags(self):
+        return self.mines

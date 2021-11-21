@@ -190,6 +190,9 @@ while True:
                     print(f"No known safe moves, AI making random move --> {move}")
             else:
                 print(f"AI making safe move ++++> {move}")
+
+            for ai_mine in ai.getFlags():
+                flags.add(ai_mine)
             time.sleep(0.2)
 
         # Reset game state
