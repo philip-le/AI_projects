@@ -117,7 +117,7 @@ class Sentence():
         """
         Returns the set of all cells in self.cells known to be mines.
         """
-        if len(self.cells) == self.count:
+        if (len(self.cells) == self.count) & (self.count != 0):
             return self.cells
         else:
             return set()
@@ -138,7 +138,7 @@ class Sentence():
         a cell is known to be a mine.
         """
         if (cell in self.cells) & (self.count >= 1):
-            self.cells -= set(cell)
+            self.cells.remove(cell)
             self.count -= 1
 
 
@@ -148,7 +148,7 @@ class Sentence():
         a cell is known to be safe.
         """
         if cell in self.cells:
-            self.cells -= set(cell)
+            self.cells.remove(cell)
 
 
 class MinesweeperAI():
@@ -232,10 +232,13 @@ class MinesweeperAI():
         # for sentence in current_knowledge:
         #     print(sentence)
         self.knowledge.append(new_sentence)
-        for acell in new_sentence.known_mines():
+        sentence_know_mines = new_sentence.known_mines().copy()
+        sentence_know_safes = new_sentence.known_safes().copy()
+
+        for acell in sentence_know_mines:
             self.mark_mine(acell)
 
-        for acell in new_sentence.known_safes():
+        for acell in sentence_know_safes:
             self.mark_safe(acell)
 
 
@@ -245,9 +248,13 @@ class MinesweeperAI():
                 if (another_sentence not in self.knowledge) & (len(another_sentence.cells)>0):
                     print(f"BInfer: {another_sentence}")
                     self.knowledge.append(another_sentence)
-                    for acell in another_sentence.known_mines():
+
+                    another_sentence_know_mines = another_sentence.known_mines().copy()
+                    another_sentence_know_safes = another_sentence.known_safes().copy()
+
+                    for acell in another_sentence_know_mines:
                         self.mark_mine(acell)
-                    for acell in another_sentence.known_safes():
+                    for acell in another_sentence_know_safes:
                         self.mark_safe(acell)
                 if (another_sentence.count < 0):
                     raise Exception
@@ -258,9 +265,13 @@ class MinesweeperAI():
                 if (another_sentence not in self.knowledge) & (len(another_sentence.cells)>0):
                     print(f"SInfer: {another_sentence}")
                     self.knowledge.append(another_sentence)
-                    for acell in another_sentence.known_mines():
+                    
+                    another_sentence_know_mines = another_sentence.known_mines().copy()
+                    another_sentence_know_safes = another_sentence.known_safes().copy()
+
+                    for acell in another_sentence_know_mines:
                         self.mark_mine(acell)
-                    for acell in another_sentence.known_safes():
+                    for acell in another_sentence_know_safes:
                         self.mark_safe(acell)
 
 
@@ -274,7 +285,7 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        safe_moves = self.safes - self.moves_made
+        safe_moves = self.safes - self.moves_made - self.mines
         print(f"Current set of predicted mines: {self.mines}")
         print(f"Current set of next safe moves: {safe_moves}")
         if len(safe_moves) > 0:
