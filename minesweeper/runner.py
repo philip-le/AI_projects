@@ -187,9 +187,9 @@ while True:
                     flags = ai.mines.copy()
                     print("No moves left to make.")
                 else:
-                    print(f"No known safe moves, AI making random move --> {move}")
+                    print(f"No known safe moves, AI making random move.")
             else:
-                print(f"AI making safe move ++++> {move}")
+                print(f"AI making safe move.")
 
             for ai_mine in ai.getFlags():
                 flags.add(ai_mine)
@@ -221,6 +221,5 @@ while True:
             nearby = game.nearby_mines(move)
             revealed.add(move)
             ai.add_knowledge(move, nearby)
-            print('****************************************')
 
     pygame.display.flip()
