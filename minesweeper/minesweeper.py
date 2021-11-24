@@ -126,7 +126,7 @@ class Sentence():
         """
         Returns the set of all cells in self.cells known to be safe.
         """
-        if self.count == 0:
+        if (self.count == 0) & (len(self.cells) > 0):
             return self.cells
         else:
             return set()
@@ -180,6 +180,10 @@ class MinesweeperAI():
         self.mines.add(cell)
         for sentence in self.knowledge:
             sentence.mark_mine(cell)
+            if (len(sentence.cells) > 0) & (cell in sentence.cells):
+                for ncell in sentence.known_mines():
+                    self.mines.add(ncell)
+
 
     def mark_safe(self, cell):
         """
@@ -189,6 +193,9 @@ class MinesweeperAI():
         self.safes.add(cell)
         for sentence in self.knowledge:
             sentence.mark_safe(cell)
+            if (len(sentence.cells) > 0) & (cell in sentence.cells):
+                for ncell in sentence.known_safes():
+                    self.safes.add(ncell)
 
     def add_knowledge(self, cell, count):
         """
@@ -228,10 +235,10 @@ class MinesweeperAI():
 
         new_sentence = Sentence(cells, count)
         print(f"Original: {new_sentence}")        
-        current_knowledge = copy.deepcopy(self.knowledge)
-        # for sentence in current_knowledge:
-        #     print(sentence)
+        current_knowledge = self.knowledge.copy()
+
         self.knowledge.append(new_sentence)
+
         sentence_know_mines = new_sentence.known_mines().copy()
         sentence_know_safes = new_sentence.known_safes().copy()
 
@@ -256,8 +263,6 @@ class MinesweeperAI():
                         self.mark_mine(acell)
                     for acell in another_sentence_know_safes:
                         self.mark_safe(acell)
-                if (another_sentence.count < 0):
-                    raise Exception
 
 
             elif other_sentence.__subset__(new_sentence) & (not other_sentence.__eq__(new_sentence)):
