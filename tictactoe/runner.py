@@ -5,8 +5,6 @@ import os
 
 import tictactoe as ttt
 
-os.chdir('/home/philip/Learning/Computer_Science/CS50_Python/tictactoe')
-
 pygame.init()
 size = width, height = 600, 400
 
