@@ -294,7 +294,9 @@ class MinesweeperAI():
         print(f"Current set of predicted mines: {self.mines}")
         print(f"Current set of next safe moves: {safe_moves}")
         if len(safe_moves) > 0:
-            return safe_moves.pop()
+            safe_one = random.sample(safe_moves, 1)[0]
+            safe_moves.remove(safe_one)
+            return safe_one
         else:
             return None
 
@@ -310,7 +312,9 @@ class MinesweeperAI():
         """
         random_moves = set((i,j) for i in range(self.height) for j in range(self.width)) - self.moves_made - self.mines
         if len(random_moves) > 0:
-            return random_moves.pop()
+            safe_one = random.sample(random_moves, 1)[0]
+            random_moves.remove(safe_one)
+            return safe_one
         else:
             return None
 
