@@ -1,10 +1,7 @@
 *.ogv
 PyChess
-<<<<<<< HEAD
-=======
 pygame/
 parallelParking/
 .vscode/
->>>>>>> master
 *.pyc
 */__pycache__/

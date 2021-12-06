@@ -2,11 +2,7 @@ import csv
 import sys
 import os
 
-<<<<<<< HEAD
-os.chdir('/home/philip/Learning/Computer Science/CS50_Python/degrees/')
-=======
 # os.chdir('/home/philip/Learning/Computer Science/CS50_Python/degrees/')
->>>>>>> master
 
 from util import Node, StackFrontier, QueueFrontier
 
