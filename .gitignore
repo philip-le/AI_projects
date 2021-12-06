@@ -1,2 +1,4 @@
 *.ogv
 PyChess
+*.pyc
+*/__pycache__/

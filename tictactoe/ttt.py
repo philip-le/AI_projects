@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 
-os.chdir('/home/philip/Learning/Computer_Science/CS50_Python/AI_projects/tictactoe')
+# os.chdir('/home/philip/Learning/Computer_Science/CS50_Python/AI_projects/tictactoe')
 
 pygame.init()
 
