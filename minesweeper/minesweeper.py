@@ -180,9 +180,6 @@ class MinesweeperAI():
         self.mines.add(cell)
         for sentence in self.knowledge:
             sentence.mark_mine(cell)
-            if (len(sentence.cells) > 0) & (cell in sentence.cells):
-                for ncell in sentence.known_mines():
-                    self.mines.add(ncell)
 
 
     def mark_safe(self, cell):
@@ -193,9 +190,6 @@ class MinesweeperAI():
         self.safes.add(cell)
         for sentence in self.knowledge:
             sentence.mark_safe(cell)
-            if (len(sentence.cells) > 0) & (cell in sentence.cells):
-                for ncell in sentence.known_safes():
-                    self.safes.add(ncell)
 
     def add_knowledge(self, cell, count):
         """
@@ -290,6 +284,17 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
+        current_knowledge = self.knowledge.copy()
+        for sentence in current_knowledge:
+            if len(sentence.known_safes()) > 0:
+                know_safes = sentence.known_safes().copy()
+                for acell in know_safes:
+                    self.mark_safe(acell)
+            if len(sentence.known_mines()) > 0:
+                know_mines = sentence.known_mines().copy()
+                for acell in know_mines:
+                    self.mark_mine(acell)
+
         safe_moves = self.safes - self.moves_made - self.mines
         print(f"Current set of predicted mines: {self.mines}")
         print(f"Current set of next safe moves: {safe_moves}")
