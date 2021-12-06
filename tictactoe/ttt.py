@@ -54,6 +54,7 @@ bs = inputNumber("Input the size of ttt-game board (less than 10): ")
 nt = inputNumber("Input the number of continuous length to win: ") 
 nt <= bs, 'Length to win must be less than or equal to board size'
 AIlevel = 4
+#AIlevel = inputNumber("Level of your AI (1 random - 7 complex): ") 
 
 X = "X"
 O = "O"

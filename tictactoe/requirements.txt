@@ -1,2 +1,5 @@
 pygame
+<<<<<<< HEAD
 joblib
+=======
+>>>>>>> master
