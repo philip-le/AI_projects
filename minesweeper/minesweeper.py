@@ -316,9 +316,19 @@ class MinesweeperAI():
             2) are not known to be mines
         """
         random_moves = set((i,j) for i in range(self.height) for j in range(self.width)) - self.moves_made - self.mines
-        if len(random_moves) > 0:
-            safe_one = random.sample(random_moves, 1)[0]
-            random_moves.remove(safe_one)
+        
+        # pick a random move with lowest probability of being a mine.
+        maxl = 0
+        maxs = random_moves
+        for sentence in self.knowledge:
+            if sentence.count == 1 and len(sentence.cells) > maxl:
+                maxl = len(sentence.cells)
+                maxs = sentence.cells      
+
+        
+        if len(maxs) > 0:
+            safe_one = random.sample(maxs, 1)[0]
+            maxs.remove(safe_one)
             return safe_one
         else:
             return None
