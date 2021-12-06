@@ -1,12 +1,13 @@
 import pygame
 import sys
 import time
+import random
 
 from minesweeper import Minesweeper, MinesweeperAI
 
-HEIGHT = 8
-WIDTH = 8
-MINES = 8
+HEIGHT = random.randint(10,20)
+WIDTH = random.randint(10,20)
+MINES = random.randint(round(HEIGHT*WIDTH/7), round(HEIGHT*WIDTH/4))
 
 # Colors
 BLACK = (0, 0, 0)
@@ -15,7 +16,7 @@ WHITE = (255, 255, 255)
 
 # Create game
 pygame.init()
-size = width, height = 600, 400
+size = width, height = 1200, 800
 screen = pygame.display.set_mode(size)
 
 # Fonts
