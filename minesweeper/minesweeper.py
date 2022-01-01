@@ -180,9 +180,6 @@ class MinesweeperAI():
         self.mines.add(cell)
         for sentence in self.knowledge:
             sentence.mark_mine(cell)
-            if (len(sentence.cells) > 0) & (cell in sentence.cells):
-                for ncell in sentence.known_mines():
-                    self.mines.add(ncell)
 
 
     def mark_safe(self, cell):
@@ -193,9 +190,6 @@ class MinesweeperAI():
         self.safes.add(cell)
         for sentence in self.knowledge:
             sentence.mark_safe(cell)
-            if (len(sentence.cells) > 0) & (cell in sentence.cells):
-                for ncell in sentence.known_safes():
-                    self.safes.add(ncell)
 
     def add_knowledge(self, cell, count):
         """
@@ -290,6 +284,17 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
+        current_knowledge = self.knowledge.copy()
+        for sentence in current_knowledge:
+            if len(sentence.known_safes()) > 0:
+                know_safes = sentence.known_safes().copy()
+                for acell in know_safes:
+                    self.mark_safe(acell)
+            if len(sentence.known_mines()) > 0:
+                know_mines = sentence.known_mines().copy()
+                for acell in know_mines:
+                    self.mark_mine(acell)
+
         safe_moves = self.safes - self.moves_made - self.mines
         print(f"Current set of predicted mines: {self.mines}")
         print(f"Current set of next safe moves: {safe_moves}")
@@ -311,9 +316,19 @@ class MinesweeperAI():
             2) are not known to be mines
         """
         random_moves = set((i,j) for i in range(self.height) for j in range(self.width)) - self.moves_made - self.mines
-        if len(random_moves) > 0:
-            safe_one = random.sample(random_moves, 1)[0]
-            random_moves.remove(safe_one)
+        
+        # pick a random move with lowest probability of being a mine.
+        maxl = 0
+        maxs = random_moves
+        for sentence in self.knowledge:
+            if sentence.count == 1 and len(sentence.cells) > maxl:
+                maxl = len(sentence.cells)
+                maxs = sentence.cells      
+
+        
+        if len(maxs) > 0:
+            safe_one = random.sample(maxs, 1)[0]
+            maxs.remove(safe_one)
             return safe_one
         else:
             return None
